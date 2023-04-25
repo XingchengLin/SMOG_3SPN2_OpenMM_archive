@@ -1,0 +1,153 @@
+<!-- Definition for your Coarse-Grained atoms -->
+<ForceField>
+<!-- Specify atom types -->
+<!-- name should be unique, and class could be more general, Example below -->
+<!-- <Type name="tip3p-O" class="OW" element="O" mass="15.99943"/> -->
+<AtomTypes>
+    <Type name="CA_ALA" class="C" element="C" mass="71.0788"/>
+    <Type name="CA_ARG" class="C" element="C" mass="156.1875"/>
+    <Type name="CA_ASN" class="C" element="C" mass="114.1038"/>
+    <Type name="CA_ASP" class="C" element="C" mass="115.0886"/>
+    <Type name="CA_CYS" class="C" element="C" mass="103.1388"/>
+    <Type name="CA_GLU" class="C" element="C" mass="129.1155"/>
+    <Type name="CA_GLN" class="C" element="C" mass="128.1307"/>
+    <Type name="CA_GLY" class="C" element="C" mass="57.0519"/>
+    <Type name="CA_HIS" class="C" element="C" mass="137.1411"/>
+    <Type name="CA_ILE" class="C" element="C" mass="113.1594"/>
+    <Type name="CA_LEU" class="C" element="C" mass="113.1594"/>
+    <Type name="CA_LYS" class="C" element="C" mass="128.1741"/>
+    <Type name="CA_MET" class="C" element="C" mass="131.1926"/>
+    <Type name="CA_PHE" class="C" element="C" mass="147.1766"/>
+    <Type name="CA_PRO" class="C" element="C" mass="97.1167"/>
+    <Type name="CA_SER" class="C" element="C" mass="87.0782"/>
+    <Type name="CA_THR" class="C" element="C" mass="101.1051"/>
+    <Type name="CA_TRP" class="C" element="C" mass="186.2132"/>
+    <Type name="CA_TYR" class="C" element="C" mass="163.1760"/>
+    <Type name="CA_VAL" class="C" element="C" mass="99.1326"/>
+</AtomTypes>
+
+<!-- Setup residue templates -->
+<!-- use type to match the atom type, and the element to match the residue, example below -->
+<!-- <Atom name="O" type="tip3p-O"/> -->
+<Residues>
+    <Residue name="ALA">
+    <Atom name="CA" type="CA_ALA"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="ARG">
+    <Atom name="CA" type="CA_ARG"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="ASN">
+    <Atom name="CA" type="CA_ASN"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="ASP">
+    <Atom name="CA" type="CA_ASP"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="CYS">
+    <Atom name="CA" type="CA_CYS"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="GLU">
+    <Atom name="CA" type="CA_GLU"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="GLN">
+    <Atom name="CA" type="CA_GLN"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="GLY">
+    <Atom name="CA" type="CA_GLY"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="HIS">
+    <Atom name="CA" type="CA_HIS"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="ILE">
+    <Atom name="CA" type="CA_ILE"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="LEU">
+    <Atom name="CA" type="CA_LEU"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="LYS">
+    <Atom name="CA" type="CA_LYS"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="MET">
+    <Atom name="CA" type="CA_MET"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="PHE">
+    <Atom name="CA" type="CA_PHE"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="PRO">
+    <Atom name="CA" type="CA_PRO"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="SER">
+    <Atom name="CA" type="CA_SER"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="THR">
+    <Atom name="CA" type="CA_THR"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="TRP">
+    <Atom name="CA" type="CA_TRP"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="TYR">
+    <Atom name="CA" type="CA_TYR"/>
+    </Residue>
+</Residues>
+
+<Residues>
+    <Residue name="VAL">
+    <Atom name="CA" type="CA_VAL"/>
+    </Residue>
+</Residues>
+
+
+</ForceField>

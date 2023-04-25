@@ -1,0 +1,139 @@
+# Test system for LAMMPS simulation
+
+units               real
+atom_style          awsemmd
+boundary            p p p
+newton              on  #yes
+
+#   ---         Variables for debye huckel potential        ---     #
+#   parallel replica temperatures
+variable            T   equal  300
+#variable            JOBIDX   world   0 1 2 3 4 5
+variable v1 equal random(1,1000,22226)
+#variable            random      equal   round(v_v1)+v_JOBIDX
+variable            random      equal   12345
+
+variable            salt        equal   150.0       # Salt concentration [mM]
+variable            ldby        equal   7.853761348027935   # debye screen length, depend on both T and salt, determined from known formula given that dielec=78
+variable            ldbi        equal   1.0/v_ldby  # debye screen length
+variable            cut_coul    equal   40.0
+                                                    
+variable            cut_lj      equal   15.0
+variable            cut_lj_pair equal   20.0
+variable            dielec      equal   78.0
+
+read_data           /nobackup1c/users/smliu/smog-3spn2c-openmm/lammps-1nk3/correct-coord/data.prot_dna_corrected
+read_dump           ../../perturbed.dcd 0 x y z box no format molfile dcd /home/xclin/lib/vmd.old/plugins/LINUXAMD64/molfile
+#read_dump           DUMP_FILE.dcd.bak 9 x y z  format molfile dcd /home/xclin/lib/vmd/plugins/LINUXAMD64/molfile
+
+variable            inputdir    string "/nobackup1c/users/smliu/smog-3spn2c-openmm/lammps-1nk3/setup/post_processing"
+# Specify the different interaction styles
+bond_style          hybrid list ${inputdir}/dna_list_files/in00_bond.list list/ca ${inputdir}/prot_list_files/ca_bond_list.txt
+angle_style         hybrid stacking/3spn2   list    ${inputdir}/dna_list_files/in00_angl.list list/ca ${inputdir}/prot_list_files/ca_angle_list.txt
+dihedral_style      hybrid list ${inputdir}/dna_list_files/in00_dihe.list list/ca ${inputdir}/prot_list_files/ca_dihed_list.txt
+#pair_style          hybrid/overlay 3spn2 bdna/curv ${T} ${salt} 18.0 50.0 lj12/cut/coul/debye ${inputdir}/prot_list_files/exclusion_list.txt ${ldbi} ${cut_lj} ${cut_coul} list ${inputdir}/prot_list_files/ca_pair_list.txt ${cut_lj_pair} nocheck lj/cut/coul/debye ${ldbi} 10.0 ${cut_coul}
+pair_style          hybrid/overlay 3spn2 bdna/curv ${T} ${salt} 18.0 50.0 list ${inputdir}/prot_list_files/ca_pair_list.txt ${cut_lj_pair} nocheck lj/cut/coul/debye ${ldbi} 10.0 ${cut_coul}
+pair_coeff          * * list
+
+dielectric          ${dielec} 
+
+# read in pair interaction
+include           /nobackup1c/users/smliu/smog-3spn2c-openmm/ff-ppInt/proteinDna_pairCoeff_variable_cut_coul.in
+
+# define groups
+group protein id 1:63
+group dna id 64:157
+group sp id 64:110:3 65:110:3 111:157:3 112:157:3 # group for all the DNA sugar and base CG atoms
+#group protein id 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63
+#group dna id 64 65 66 67 68 69 70 71 72 73 74 75 76 77 78 79 80 81 82 83 84 85 86 87 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102 103 104 105 106 107 108 109 110 111 112 113 114 115 116 117 118 119 120 121 122 123 124 125 126 127 128 129 130 131 132 133 134 135 136 137 138 139 140 141 142 143 144 145 146 147 148 149 150 151 152 153 154 155 156 157
+
+## shift the cutoff energy
+pair_modify         shift yes
+
+include           ${inputdir}/forcefield/bonded_ff.txt
+
+#   ---         group definitions       --- #
+#include             ${inputdir}/groupsDefinition/group_rigid.txt
+#group nonRigidBody subtract all prc2
+#group2ndx           groups.ndx  
+
+# ---     from AWSEM simulation   ---
+neighbor            5      bin 
+#neigh_modify exclude group prc2 prc2 check no
+neigh_modify        check  yes     one 5000    # this avoids the error "boost neigh_modify one"
+
+atom_modify         sort 0 0.0
+#special_bonds       fene
+special_bonds       lj 0.0 0.0 0.0
+#delete_bonds prc2 multi remove
+
+# compute different components of DNA non-bonded energy
+# code from LAMMPS-3SPN2/GCGI/example/DNA_with_GCGI_ions.in
+compute edna all pair 3spn2
+variable ebp equal c_edna[1] # Base pairing energy
+variable ecstk equal c_edna[2] # Cross stacking energy
+variable eexcl equal c_edna[3] # Excluded volume energy
+variable dna_ecoul equal c_edna[4] # DNA coulombic energy
+variable nbp equal c_edna[5] # Number of base pairs
+
+#compute e_dna_angles dna angle/local eng
+#compute sum_e_dna_angles dna reduce sum c_e_dna_angles[*]
+#compute e_protein_angles protein angle/local eng
+#compute sum_e_protein_angles protein reduce sum c_e_protein_angles[*]
+#compute e_angles all angle/local eng
+#compute sum_e_angles all reduce sum c_e_angles[*]
+#compute e_bstk sp angle/local eng
+#compute sum_e_bstk sp reduce sum c_e_bstk[*]
+compute e_bonds all bond
+compute e_angles all angle
+compute e_dihedrals all dihedral
+compute e_sbm_pair all pair list
+compute e_lj_debye all pair lj/cut/coul/debye
+compute e_lj_debye_vdwl all pair lj/cut/coul/debye evdwl
+compute e_lj_debye_coul all pair lj/cut/coul/debye ecoul
+
+compute angle_atoms all property/local aatom1 aatom2 aatom3 atype
+compute angle_data all angle/local eng theta
+compute protein_angle_atoms protein property/local aatom1 aatom2 aatom3 atype
+compute protein_angle_data protein angle/local eng theta
+compute dna_angle_atoms dna property/local aatom1 aatom2 aatom3 atype
+compute dna_angle_data dna angle/local eng theta
+
+#####################################################
+# A timestep of 2.0 fs
+timestep            2.0
+thermo              1
+#thermo_style        multi
+thermo_style        custom step pe v_ebp v_ecstk v_eexcl v_dna_ecoul v_nbp c_e_bonds[*] c_e_angles[*] c_e_dihedrals[*] c_e_sbm_pair c_e_lj_debye c_e_lj_debye_vdwl c_e_lj_debye_coul
+thermo_modify flush yes
+
+#dump                1 all dcd 1 DUMP_FILE_job${JOBIDX}.dcd
+dump                1 all dcd 1 DUMP_FILE.dcd
+dump_modify         1 sort id
+dump                dump_angles all local 1 angles.dump index c_angle_atoms[*] c_angle_data[*]
+#dump                dump_protein_angles protein local 1 protein_angles.dump index c_protein_angle_atoms[*] c_protein_angle_data[*]
+#dump                dump_dna_angles dna local 1 dna_angles.dump index c_dna_angle_atoms[*] c_dna_angle_data[*]
+
+restart             50000 state.1.cpt state.2.cpt
+#restart             50000 state_job${JOBIDX}.1.cpt state_job${JOBIDX}.2.cpt
+
+velocity            all create ${T} ${random} rot yes mom yes dist gaussian
+
+# Fix from plumed
+#fix     pl all plumed plumedfile plumed.dat outfile plumed.out
+#fix                 3 all colvars input.colvars output out_job${JOBIDX}
+#fix_modify          3 energy yes
+
+#####################################################
+#   ---         Parallel Tempering      ---     #
+#minimize        1.0e-4 1.0e-6 100 1000
+reset_timestep 0
+
+#fix myfix   all nve
+fix myfix   all nvt temp ${T} ${T} 200.0
+#fix             rigidBody core rigid/nvt group 1 prc2 temp ${T} ${T} 1000.0
+#fix             1   nonRigidBody nve
+#fix             myfix nonRigidBody langevin ${T} ${T} 1000.0 ${rseed}
+#fix             rigidBody core rigid group 1 prc2 langevin ${T} ${T} 1000.0 428984
+
+run 0

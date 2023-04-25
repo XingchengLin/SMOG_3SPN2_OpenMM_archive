@@ -1,0 +1,1 @@
+topo readlammpsdata dna_from_xtal_converted.in
